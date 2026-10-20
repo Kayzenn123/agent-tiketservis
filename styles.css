@@ -1,0 +1,697 @@
+/* ============================================================
+   TiketServis — "Loket karcis bengkel di terminal malam"
+   Hari 11 · 30 Days of Code
+   CONSTRAINT KERAS: hanya garis tanpa fill.
+   Tombol/bingkai/ikon = outline 2px, radius maks 4px,
+   tanpa shadow lembut, tanpa gradient (kecuali pola
+   dekoratif wajib: perforasi dots + garis diagonal +
+   divider zigzag — itu pola, bukan fill).
+   ============================================================ */
+
+/* ---------- Token ---------- */
+:root {
+  --bg: #141a10;
+  --surface: #1e2a18;
+  --text: #f2f7ec;
+  --muted: #a8b89a;
+  --accent: #7ddb4e;
+  --accent-2: #a4e635;
+  --pop: #c4b5fd;
+
+  --garis: 2px solid var(--accent);
+  --garis-tipis: 1.5px solid var(--muted);
+
+  --font-display: "Noto Sans Lisu", "Segoe UI", sans-serif;
+  --font-body: "Kodchasan", "Segoe UI", sans-serif;
+  --font-aksen: "Londrina Solid", "Arial Black", sans-serif;
+
+  --tap: 44px;
+  --lebar: 72rem;
+}
+
+/* ---------- Font self-host ---------- */
+@font-face {
+  font-family: "Noto Sans Lisu";
+  src: url("fonts/noto-sans-lisu.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Noto Sans Lisu";
+  src: url("fonts/noto-sans-lisu.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Kodchasan";
+  src: url("fonts/kodchasan-400.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Kodchasan";
+  src: url("fonts/kodchasan-700.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: "Londrina Solid";
+  src: url("fonts/londrina-solid.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ---------- Reset ringkas ---------- */
+*, *::before, *::after { box-sizing: border-box; }
+* { margin: 0; }
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.6;
+  min-height: 100svh;
+}
+img, svg { display: block; max-width: 100%; }
+button, input { font: inherit; color: inherit; }
+[hidden] { display: none !important; }
+
+/* ---------- Aksesibilitas ---------- */
+:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+#lewati {
+  position: absolute;
+  top: -100px;
+  left: 1rem;
+  z-index: 200;
+  background: var(--bg);
+  color: var(--accent);
+  border: var(--garis);
+  border-radius: 4px;
+  padding: 0.75rem 1.25rem;
+  min-height: var(--tap);
+  text-decoration: none;
+  font-weight: 700;
+  transition: top 0.15s ease;
+}
+#lewati:focus { top: 1rem; }
+
+/* Sprite SVG: disembunyikan tapi tetap bisa dipakai <use> */
+.sprite {
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+}
+symbol { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ---------- Tombol dasar (outline only) ---------- */
+button {
+  background: transparent;
+  border: var(--garis);
+  border-radius: 4px;
+  color: var(--accent);
+  font-weight: 700;
+  min-height: var(--tap);
+  min-width: var(--tap);
+  padding: 0.6rem 1.1rem;
+  cursor: pointer;
+  transition: color 0.15s ease, border-color 0.15s ease, transform 0.15s ease;
+}
+button:hover {
+  color: var(--accent-2);
+  border-color: var(--accent-2);
+  transform: translateY(-1px);
+}
+button:active { transform: translateY(1px); }
+button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ---------- Header loket ---------- */
+.loket-top {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.75rem 1rem;
+  background: var(--bg);
+  border-bottom: var(--garis);
+}
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  color: var(--text);
+  text-decoration: none;
+  min-height: var(--tap);
+}
+.logo__karcis {
+  width: 2rem;
+  height: 2rem;
+  color: var(--accent);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+}
+.logo__teks {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.25rem;
+  letter-spacing: 0.02em;
+}
+#gerak-toggle { font-size: 0.9rem; white-space: nowrap; }
+#gerak-toggle[aria-pressed="false"] { color: var(--muted); border-color: var(--muted); }
+
+/* ---------- Layout utama ---------- */
+main#konten {
+  max-width: var(--lebar);
+  margin-inline: auto;
+  padding-inline: 1rem;
+}
+
+/* ---------- Hero: karcis raksasa ---------- */
+#hero { padding-block: 2.5rem 0; position: relative; overflow: hidden; }
+/* overflow:hidden: zoom scrub .karcis-raksasa (scale s.d. 2.2) tidak boleh
+   melebarkan document scrollWidth — efek zoom-through wajib terklip di batas section. */
+.garis-terminal {
+  height: 18px;
+  margin-bottom: 1.5rem;
+  background: repeating-linear-gradient(
+    -45deg,
+    transparent 0 12px,
+    rgba(125, 219, 78, 0.22) 12px 14px
+  );
+}
+.karcis-raksasa {
+  position: relative;
+  border: var(--garis);
+  border-radius: 4px;
+  background: var(--surface);
+  padding: clamp(1.5rem, 6vw, 4rem);
+  text-align: center;
+  overflow: hidden;
+}
+/* perforasi tepi karcis raksasa */
+.karcis-raksasa::before,
+.karcis-raksasa::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 14px;
+  background: radial-gradient(circle at 50% 7px, var(--bg) 4px, transparent 4.6px);
+  background-size: 14px 16px;
+  background-repeat: repeat-y;
+}
+.karcis-raksasa::before { left: 6px; }
+.karcis-raksasa::after { right: 6px; }
+.karcis-raksasa__atas {
+  color: var(--muted);
+  font-size: 0.85rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+}
+.karcis-raksasa h1 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  /* 12.5vw: "TiketServis" (11 glyph, rasio lebar/font ≈ 6.14) muat penuh di
+     kartu 360px (inner ±280px → 45px font ≈ 276px). 18vw kepotong tengah
+     glyph di mobile (temuan QA 2026-10-20). */
+  font-size: clamp(2.5rem, 12.5vw, 11rem);
+  line-height: 1;
+  color: var(--text);
+  letter-spacing: -0.01em;
+}
+.karcis-raksasa .lead {
+  font-size: clamp(1.1rem, 4.5vw, 1.75rem);
+  color: var(--accent);
+  font-weight: 700;
+  margin-top: 0.75rem;
+}
+.karcis-raksasa__seri {
+  font-family: var(--font-aksen);
+  color: var(--muted);
+  letter-spacing: 0.12em;
+  margin-top: 1.25rem;
+  font-size: 1rem;
+}
+.karcis-raksasa__cap {
+  position: absolute;
+  right: clamp(1.5rem, 6vw, 3rem);
+  bottom: clamp(1.5rem, 6vw, 3rem);
+}
+
+/* Cap stempel */
+.cap {
+  display: inline-block;
+  font-family: var(--font-aksen);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--pop);
+  border: 3px double var(--pop);
+  border-radius: 2px;
+  padding: 0.2em 0.7em;
+  transform: rotate(-8deg);
+  font-size: 1rem;
+  line-height: 1.2;
+}
+
+/* Divider zigzag */
+.zigzag {
+  height: 14px;
+  margin-top: 2rem;
+  opacity: 0.55;
+  background:
+    linear-gradient(135deg, var(--accent) 25%, transparent 25%) -7px 0 / 14px 14px repeat-x,
+    linear-gradient(225deg, var(--accent) 25%, transparent 25%) -7px 0 / 14px 14px repeat-x;
+}
+
+/* ---------- Marquee ---------- */
+.marquee {
+  overflow: hidden;
+  border-top: var(--garis);
+  border-bottom: var(--garis);
+  margin-top: 2rem;
+  padding-block: 0.6rem;
+  background: var(--bg);
+}
+.marquee--balik {
+  margin-top: 0;
+  border-top: none;
+  background: var(--surface);
+}
+.marquee-track {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
+  will-change: transform;
+  animation: marquee-geser 28s linear infinite;
+}
+.marquee--balik .marquee-track {
+  animation-direction: reverse;
+  animation-duration: 36s;
+}
+.marquee-isi { display: inline-flex; align-items: center; }
+.marquee-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: 0.04em;
+  color: var(--text);
+  padding-inline: 0.75rem;
+  min-height: var(--tap);
+}
+.marquee-item svg {
+  width: 1.5rem;
+  height: 1.5rem;
+  color: var(--accent);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  flex: none;
+}
+.marquee-pisah { color: var(--accent); padding-inline: 0.25rem; }
+.marquee-isi--teks {
+  font-family: var(--font-aksen);
+  font-size: 1.15rem;
+  letter-spacing: 0.14em;
+  color: var(--accent);
+  text-transform: uppercase;
+}
+@keyframes marquee-geser {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+/* ---------- Section loket ---------- */
+#loket { padding-block: 3rem 2rem; }
+#loket-judul {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(1.75rem, 7vw, 2.75rem);
+  line-height: 1.15;
+}
+.loket__sub { color: var(--muted); margin-top: 0.5rem; max-width: 40rem; }
+
+.cari-label {
+  display: block;
+  font-weight: 700;
+  margin-top: 1.75rem;
+  margin-bottom: 0.4rem;
+}
+#cari {
+  width: 100%;
+  max-width: 32rem;
+  min-height: var(--tap);
+  font-size: 16px; /* cegah zoom iOS */
+  background: var(--surface);
+  border: var(--garis);
+  border-radius: 4px;
+  color: var(--text);
+  padding: 0.7rem 1rem;
+}
+#cari::placeholder { color: var(--muted); }
+.cari-bantuan { color: var(--muted); font-size: 0.9rem; margin-top: 0.35rem; }
+
+#saring {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 1.25rem;
+}
+.chip { font-size: 0.95rem; }
+.chip.is-aktif {
+  color: var(--bg);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+/* ---------- Panggung tumpukan karcis ---------- */
+#panggung {
+  position: relative;
+  perspective: 1400px;
+  margin-top: 2rem;
+  padding-bottom: 4.5rem; /* ruang tombol prev/next */
+}
+#tumpukan {
+  position: relative;
+  min-height: 480px;
+  touch-action: pan-y;
+}
+.karcis {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: min(100%, 26rem);
+  display: grid;
+  grid-template-columns: 5.5rem 1fr;
+  background: var(--surface);
+  border: var(--garis);
+  border-radius: 4px;
+  overflow: hidden;
+  cursor: grab;
+  transform: translateX(-50%);
+}
+/* tumpukan miring acak kecil */
+.karcis:nth-child(1) { transform: translateX(-50%) rotate(-2.4deg); z-index: 7; }
+.karcis:nth-child(2) { transform: translateX(-50%) rotate(1.8deg) translateY(10px); z-index: 6; }
+.karcis:nth-child(3) { transform: translateX(-50%) rotate(-1.2deg) translateY(20px); z-index: 5; }
+.karcis:nth-child(4) { transform: translateX(-50%) rotate(2.6deg) translateY(30px); z-index: 4; }
+.karcis:nth-child(5) { transform: translateX(-50%) rotate(-2deg) translateY(40px); z-index: 3; }
+.karcis:nth-child(6) { transform: translateX(-50%) rotate(1.4deg) translateY(50px); z-index: 2; }
+.karcis:nth-child(7) { transform: translateX(-50%) rotate(-1deg) translateY(60px); z-index: 1; }
+
+.karcis-stub {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 1rem 0.5rem;
+  color: var(--accent);
+}
+/* perforasi: dots vertikal antara stub & badan */
+.karcis-stub::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  right: -8px;
+  width: 14px;
+  background: radial-gradient(circle at 50% 7px, var(--bg) 4px, transparent 4.6px);
+  background-size: 14px 16px;
+  background-repeat: repeat-y;
+}
+.karcis-stub__teks {
+  writing-mode: vertical-rl;
+  text-transform: uppercase;
+  letter-spacing: 0.3em;
+  font-size: 0.75rem;
+  color: var(--muted);
+}
+.karcis-stub__ikon {
+  width: 2.25rem;
+  height: 2.25rem;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.karcis-stub .cap { font-size: 0.72rem; }
+
+.karcis-badan { padding: 1.1rem 1.25rem 1.25rem 1.5rem; }
+.karcis-badan h3 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.4rem;
+  line-height: 1.2;
+}
+.nomor-seri {
+  font-family: var(--font-aksen);
+  color: var(--muted);
+  letter-spacing: 0.1em;
+  font-size: 0.95rem;
+  margin-top: 0.25rem;
+}
+.rincian {
+  list-style: none;
+  padding: 0;
+  margin-top: 0.9rem;
+  display: grid;
+  gap: 0.45rem;
+  color: var(--text);
+  font-size: 0.95rem;
+}
+.rincian li {
+  padding-left: 1.1rem;
+  position: relative;
+}
+.rincian li::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0.62em;
+  width: 0.55rem;
+  height: 2px;
+  background: var(--accent);
+}
+.harga {
+  font-family: var(--font-aksen);
+  font-size: 2rem;
+  color: var(--accent);
+  margin-top: 1rem;
+  letter-spacing: 0.02em;
+}
+.harga__label {
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  margin-right: 0.4rem;
+}
+.ambil { margin-top: 1rem; width: 100%; }
+
+#karcis-prev, #karcis-next {
+  position: absolute;
+  bottom: 0;
+}
+#karcis-prev { left: 0; }
+#karcis-next { right: 0; }
+
+/* ---------- Dialog detail ---------- */
+#detail {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: rgba(20, 26, 16, 0.92);
+}
+#detail-blob {
+  position: absolute;
+  width: min(92vw, 34rem);
+  height: auto;
+  color: var(--accent);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  opacity: 0.35;
+  pointer-events: none;
+}
+#detail-isi {
+  position: relative;
+  width: min(92vw, 30rem);
+  max-height: 82svh;
+  overflow: auto;
+  background: var(--surface);
+  border: var(--garis);
+  border-radius: 4px;
+  padding: 1.5rem;
+}
+#detail-judul {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  margin-bottom: 0.75rem;
+}
+#detail-tutup { margin-top: 1.25rem; width: 100%; }
+
+/* ---------- Dompet ---------- */
+#dompet {
+  margin-top: 1rem;
+  border: var(--garis);
+  border-radius: 4px;
+  background: var(--surface);
+  padding: 1.5rem;
+}
+#dompet-judul {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+}
+.dompet__salam { color: var(--muted); margin-top: 0.4rem; }
+#dompet-list {
+  list-style: none;
+  padding: 0;
+  margin-top: 1rem;
+  display: grid;
+  gap: 0.6rem;
+}
+#dompet-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  border: var(--garis-tipis);
+  border-radius: 4px;
+  padding: 0.6rem 0.8rem;
+}
+#dompet-total {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.5rem 1rem;
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: var(--garis);
+}
+.dompet-total__label {
+  text-transform: uppercase;
+  letter-spacing: 0.14em;
+  font-size: 0.8rem;
+  color: var(--muted);
+  width: 100%;
+}
+#total-harga {
+  font-family: var(--font-aksen);
+  font-size: 2.25rem;
+  color: var(--accent);
+}
+#total-waktu { color: var(--muted); }
+.dompet__aksi {
+  display: grid;
+  gap: 0.6rem;
+  margin-top: 1.25rem;
+}
+#dompet-kosongkan { color: var(--muted); border-color: var(--muted); }
+
+/* ---------- Toast ---------- */
+#toast {
+  position: fixed;
+  left: 50%;
+  bottom: 1.25rem;
+  transform: translateX(-50%) translateY(150%);
+  z-index: 150;
+  max-width: min(92vw, 28rem);
+  background: var(--surface);
+  border: var(--garis);
+  border-radius: 4px;
+  color: var(--text);
+  padding: 0.8rem 1.2rem;
+  font-weight: 700;
+  text-align: center;
+  transition: transform 0.25s ease;
+}
+#toast.tampil { transform: translateX(-50%) translateY(0); }
+
+/* ---------- Footer ---------- */
+.loket-bawah {
+  max-width: var(--lebar);
+  margin-inline: auto;
+  padding: 0 1rem 3rem;
+  color: var(--muted);
+}
+.loket-bawah .zigzag { margin: 0 0 1.5rem; }
+.loket-bawah strong { color: var(--text); }
+.loket-bawah__kecil { margin-top: 0.5rem; font-size: 0.9rem; }
+
+/* ---------- Tablet & desktop ---------- */
+@media (min-width: 48rem) {
+  .dompet__aksi { grid-template-columns: repeat(3, 1fr); }
+  #tumpukan { min-height: 500px; }
+}
+@media (min-width: 80rem) {
+  main#konten {
+    display: grid;
+    grid-template-columns: 1fr 22rem;
+    gap: 2rem;
+    align-items: start;
+  }
+  #hero, .marquee, #loket { grid-column: 1 / -1; }
+  #dompet {
+    grid-column: 2;
+    grid-row: 4;
+    position: sticky;
+    top: 5rem;
+    margin-top: 0;
+  }
+}
+
+/* ---------- Mode ringan (deterministik, tanpa tunggu GSAP) ---------- */
+/* Perangkat kentang (<=4 core / <=4GB / save-data): marquee cukup 1 band.
+   Kelas dipasang app.js saat DOMContentLoaded; motion.js tetap sinkron. */
+.ringan .marquee--balik { display: none; }
+
+/* ---------- Gerak mati ---------- */
+/* Toggle manual #gerak-toggle (kelas di <html>) */
+.gerak-mati *,
+.gerak-mati *::before,
+.gerak-mati *::after {
+  animation: none !important;
+  transition: none !important;
+}
+.gerak-mati html { scroll-behavior: auto; }
+
+/* Hormati preferensi sistem */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

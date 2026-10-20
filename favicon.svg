@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <rect x="5" y="20" width="54" height="26" rx="3" fill="#141a10" stroke="#7ddb4e" stroke-width="3"/>
+  <line x1="21" y1="20" x2="21" y2="46" stroke="#7ddb4e" stroke-width="3" stroke-dasharray="3 4"/>
+  <circle cx="13" cy="33" r="4" fill="none" stroke="#a4e635" stroke-width="2.5"/>
+  <text x="31" y="39" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="bold" fill="#f2f7ec" letter-spacing="1">TS</text>
+</svg>
